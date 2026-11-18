@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>EduStep — интерактивная учебная платформа</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0b1220;--panel:#121e30;--panel2:#1a2a40;--text:#f4f7fb;--muted:#a8b6c9;--blue:#69aefc;--green:#26c281;--red:#f06470;--line:#2a3b52}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at top,#182a43 0%,var(--bg) 58%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+
+button, .logo, .subject-card, .grade, .topic-btn, .nav-back, .pill {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+button, input, textarea, select{font:inherit}
+.wrap{width:min(1120px,100%);margin:auto;padding: max(14px,env(safe-area-inset-top)) 15px max(34px,env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 20px}
+
+.logo{
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:-.8px;
+  cursor:pointer;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  border-radius: 14px;
+  transition: all 0.25s ease;
+  display: inline-block;
+}
+.logo span{color:var(--blue)}
+.logo:hover{
+  border-color: var(--blue);
+  background: var(--panel2);
+  transform: translateY(-1px);
+}
+
+.header-right{display:flex;align-items:center;gap:10px}
+.pill{font-size:12px;color:#9ee7c7;background:#173d35;border:1px solid #27614e;border-radius:99px;padding:6px 10px;white-space:nowrap}
+
+.hero{padding:22px 20px;border:1px solid #2a405b;border-radius:22px;background:linear-gradient(135deg,#1b3554,#142239 65%,#17283e);margin-bottom:20px;box-shadow:0 8px 25px rgba(0,0,0,0.2)}.eyebrow{color:#9dcaff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px}h1{font-size:clamp(25px,5vw,36px);line-height:1.08;margin:9px 0}.sub{color:#c0cde0;line-height:1.55;margin:0;font-size:14px}
+
+.screen {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.subjects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:15px}
+.subject-card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:24px;text-align:center;cursor:pointer;transition:all .25s ease;display:block;width:100%}
+.subject-card:hover{border-color:var(--blue);background:var(--panel2);transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,0.3)}
+.subject-card:active{transform:scale(.97)}
+.subject-card h2{margin:10px 0 5px;font-size:22px;color:var(--text)}
+.subject-card p{color:var(--muted);font-size:13px;margin:0}
+.subject-icon{font-size:28px;font-weight:bold;color:var(--blue);margin-bottom:6px;transition:transform 0.3s ease}
+.subject-card:hover .subject-icon{transform:scale(1.15)}
+
+.section-title{font-size:18px;font-weight:800;margin:21px 2px 11px}
+.grades{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.grade{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:15px;padding:15px 5px;text-align:center;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s ease}
+.grade b{display:block;font-size:24px;color:#a9d1ff;margin-bottom:2px;transition:color 0.2s ease}
+.grade:hover{border-color:var(--blue);background:var(--panel2);transform:translateY(-2px)}
+.grade:hover b{color:var(--blue)}
+.grade:active{transform:scale(.95)}
+
+.topic-list{display:grid;grid-template-columns:1fr;gap:10px}
+.topic-btn{text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:16px;padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s ease;width:100%}
+.topic-btn:hover{border-color:var(--blue);background:var(--panel2);transform:translateX(4px)}
+.topic-btn:active{transform:scale(.98)}
+.topic-info .topic-number{font-size:11px;color:#9dcaff;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.topic-info strong{display:block;font-size:16px;line-height:1.3;margin-top:4px}
+.topic-arrow{font-size:18px;color:var(--blue);font-weight:800;transition:transform 0.2s ease}
+.topic-btn:hover .topic-arrow{transform:translateX(4px)}
+
+.nav-back{background:none;border:none;color:var(--blue);font-weight:700;font-size:14px;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:6px;margin-bottom:15px;transition:all 0.2s ease}
+.nav-back:hover{opacity:0.8;transform:translateX(-3px)}
+
+.card{background:rgba(18,30,48,.96);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:15px;box-shadow:0 12px 30px rgba(0,0,0,0.25)}
+.muted{color:var(--muted);font-size:13px}
+.lesson-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.topic-title{font-size:22px;line-height:1.2;font-weight:850;margin:8px 0 12px}
+
+.theory-container {margin-bottom: 15px;}
+.theory-toggle-btn {background: var(--panel2);border: 1px solid var(--line);color: var(--blue);border-radius: 12px;padding: 10px 16px;font-weight: 700;font-size: 13px;cursor: pointer;transition: all 0.2s ease;display: inline-flex;align-items: center;gap: 6px;width: 100%;justify-content: center;}
+.theory-toggle-btn:hover {border-color: var(--blue);background: #1d3350;}
+.theory-dropdown {max-height: 0;overflow: hidden;transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;opacity: 0;}
+.theory-dropdown.open {max-height: 500px;opacity: 1;}
+.theory-block {background:#142337;border:1px solid #233956;border-radius:16px;padding:16px 18px;margin-top: 10px;}
+.theory-block h3 {margin:0 0 8px 0;font-size:15px;color:var(--blue);}
+.theory{color:#d3deec;font-size:14px;line-height:1.6;margin:0}
+
+.example{background:#10263a;border:1px solid #2a4965;border-radius:14px;padding:14px 16px;margin-top:10px}
+.example-label{font-size:11px;color:#9dcaff;font-weight:850;letter-spacing:.7px;text-transform:uppercase}
+.example p{font-size:14px;line-height:1.55;margin:6px 0 0;color:#e5edf7}
+.progress{height:8px;background:#293b52;border-radius:20px;overflow:hidden;margin:20px 0 5px}
+.progress>div{height:100%;background:linear-gradient(90deg,#5ca8ff,#42d49b);width:0%;transition:width 0.4s cubic-bezier(0.1, 0.9, 0.2, 1)}
+
+.task{padding:16px 0;border-bottom:1px solid #26364b;transition:all 0.2s ease}
+.task:last-child{border-bottom:0;padding-bottom:2px}
+.task-head{display:flex;gap:12px;align-items:flex-start}
+.num{flex:0 0 28px;height:28px;border-radius:99px;background:#243b58;color:#a9d1ff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.question{font-weight:650;line-height:1.45;padding-top:3px;font-size:14px}
+.answer{margin:11px 0 0 40px}
+.answer input{width:100%;min-width:0;background:#0c1727;border:1px solid #344861;border-radius:11px;padding:12px 14px;color:white;font-size:16px;outline:none;transition:all 0.2s ease}
+.answer input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #69aefc20}
+.answer input.correct{border-color:var(--green);background:#123329}
+.answer input.wrong{border-color:var(--red);background:#391f2a;animation:shake 0.3s ease}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.feedback{font-size:12px;margin:7px 0 0 40px;line-height:1.45;color:var(--muted);animation:fadeIn 0.25s ease}
+.feedback.good{color:#58dfa6}
+.feedback.bad{color:#ff8991}
+
+.actions{display:flex;gap:10px;margin-top:20px}
+.primary,.secondary{border:0;border-radius:13px;padding:13px 18px;font-weight:800;cursor:pointer;min-height:48px;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:6px}
+.primary{background:linear-gradient(135deg,#75b9ff,#4e96f0);color:#071426;flex:1}
+.primary:hover{opacity:0.92;transform:translateY(-1px)}
+.secondary{background:#25364c;color:#dce8f7}
+.secondary:hover{background:#2e435e}
+.secondary:active{transform:scale(.98)}
+.secondary:disabled {opacity: 0.4;cursor: not-allowed;}
+
+.result{display:none;margin-top:18px;padding:16px;border-radius:14px;background:#172b40;border:1px solid #34516d;animation:fadeIn 0.3s ease}
+.result.show{display:block}
+.result strong{font-size:22px}
+.result p{color:#c0cde0;margin:6px 0 0;font-size:13px;line-height:1.5}
+
+.note{font-size:12px;color:#8294aa;text-align:center;margin:22px 8px 4px;line-height:1.5}
+
+.author-credits {font-size: 12px;font-weight: 500;color: var(--muted);text-align: center;margin-bottom: 5px;opacity: 0.7;}
+
+.footer-container {text-align: center;margin-top: 25px;}
+
+.hidden{display:none!important}
+
+.frac {display:inline-flex;vertical-align:middle;flex-direction:column;text-align:center;font-size:0.9em;padding:0 4px}
+.frac .num {border-bottom:1.5px solid currentColor;padding:0 2px 1px 2px;background:transparent;color:inherit;border-radius:0;height:auto;width:auto;display:block}
+.frac .den {padding:1px 2px 0 2px;display:block}
+
+/* ===== Конструктор тестов ===== */
+.creator-label{font-size:13px;color:#b8c9dc;font-weight:700;display:block;margin-top:6px}
+.creator-input, .creator-textarea, .creator-select{width:100%;padding:12px;background:#0c1727;color:white;border:1px solid #344861;border-radius:10px;margin:5px 0 12px}
+.creator-textarea{resize:vertical;min-height:75px}
+.q-editor{background:#142337;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.q-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.q-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.q-danger{border:0;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer;background:#492530;color:#ffb8c2}
+.creator-error{color:#ff8991;font-size:13px;min-height:18px;margin:6px 0}
+.qr-wrap{background:white;color:#111;border-radius:15px;padding:18px;text-align:center;width:max-content;max-width:100%;margin:15px auto}
+#qrcode{display:flex;justify-content:center}
+#qrcode img,#qrcode canvas{max-width:100%;height:auto}
+.share-url{overflow-wrap:anywhere;background:#0c1727;border-radius:10px;padding:12px;font-size:12px;color:#b9d7fa;margin-bottom:10px}
+
+.student-option{display:flex;gap:10px;align-items:center;padding:12px;background:#0c1727;border:1px solid var(--line);border-radius:10px;margin:8px 0}
+.student-option input{width:auto;margin:0}
+.student-text{width:100%;padding:12px;background:#0c1727;color:white;border:1px solid #344861;border-radius:10px;margin:8px 0}
+
+@media(min-width:960px){
+  #questionEditors{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  #questionEditors .q-editor{margin:0}
+}
+
+@media(max-width:600px){
+  .wrap{padding-left:12px;padding-right:12px}
+  .hero{padding:19px 16px}
+  .subjects-grid{grid-template-columns:1fr}
+  .card{padding:14px}
+  .topic-title{font-size:19px}
+  .q-options{grid-template-columns:1fr}
+  .grades{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo" id="homeLogo">Edu<span>Step</span></div>
+  <div class="header-right">
+    <div class="pill" id="userBadge">Пройдено тестов: 0</div>
+  </div>
+</header>
+
+<div id="screenHome" class="screen">
+  <section class="hero">
+    <div class="eyebrow">Твоя учебная платформа</div>
+    <h1>Учись и проверяй<br>свои знания</h1>
+    <p class="sub">Выбери предмет, чтобы начать пошаговое обучение. Тебя ждут подробные разборы теории, наглядные примеры и динамические тесты с автоматической генерацией новых заданий.</p>
+  </section>
+  <div class="section-title">Выбери предмет</div>
+  <div class="subjects-grid">
+    <button type="button" class="subject-card" onclick="window.selectSubject('math')">
+      <div class="subject-icon">📐</div>
+      <h2>Математика</h2>
+      <p>Арифметика, уравнения, дроби, геометрия и проценты с 1 по 5 класс.</p>
+    </button>
+    <button type="button" class="subject-card" onclick="window.selectSubject('rus')">
+      <div class="subject-icon">📚</div>
+      <h2>Русский язык</h2>
+      <p>Орфография, пунктуация, морфология, части речи и фразеология.</p>
+    </button>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 6px;font-size:19px">🧑‍🏫 Создать свой тест</h2>
+    <p class="muted" style="margin:0 0 12px">Составь собственные задания и поделись тестом с учениками через QR-код или ссылку.</p>
+    <button type="button" class="primary" style="width:100%" onclick="window.openCreator()">＋ Создать тест</button>
+  </div>
+</div>
+
+<div id="screenGrades" class="screen hidden">
+  <button type="button" class="nav-back" onclick="window.goToHome()">← Назад к предметам</button>
+  <section class="hero">
+    <div class="eyebrow" id="gradesHeroSub">Математика</div>
+    <h1>Выбери класс</h1>
+    <p class="sub">Нажми на свой класс, чтобы открыть список доступных тем для изучения.</p>
+  </section>
+  <div class="grades">
+    <button type="button" class="grade" onclick="window.selectGrade(1)"><b>1</b>класс</button>
+    <button type="button" class="grade" onclick="window.selectGrade(2)"><b>2</b>класс</button>
+    <button type="button" class="grade" onclick="window.selectGrade(3)"><b>3</b>класс</button>
+    <button type="button" class="grade" onclick="window.selectGrade(4)"><b>4</b>класс</button>
+    <button type="button" class="grade" onclick="window.selectGrade(5)"><b>5</b>класс</button>
+  </div>
+</div>
+
+<div id="screenTopics" class="screen hidden">
+  <button type="button" class="nav-back" onclick="window.goToGrades()">← Назад к классам</button>
+  <section class="hero">
+    <div class="eyebrow" id="topicsHeroSub">Математика · 1 класс</div>
+    <h1>Выбери тему</h1>
+    <p class="sub">Изучи глубокую теорию и переходи к решению обновляемого тренажёра.</p>
+  </section>
+  <div class="topic-list" id="topicListContainer"></div>
+</div>
+
+<div id="screenLesson" class="screen hidden">
+  <button type="button" class="nav-back" onclick="window.goToTopics()">← Назад к списку тем</button>
+  <section class="card" id="lesson" aria-live="polite">
+   <div class="lesson-head">
+     <span class="muted" id="gradeLabel">1 класс · Математика</span>
+     <span class="muted" id="countLabel">12 заданий</span>
+   </div>
+   <div class="topic-title" id="topicTitle"></div>
+   
+   <div class="theory-container">
+     <button type="button" class="theory-toggle-btn" id="theoryToggleBtn">Подробнее (Теория и правила)</button>
+     <div class="theory-dropdown" id="theoryDropdown">
+       <div class="theory-block">
+         <h3>Теоретический материал и правила</h3>
+         <p class="theory" id="theory"></p>
+       </div>
+     </div>
+   </div>
+   
+   <div class="example">
+     <div class="example-label">Наглядный пример решения</div>
+     <p id="example"></p>
+   </div>
+
+   <div class="progress" aria-label="Результат"><div id="progressBar"></div></div>
+   <div id="tasks"></div>
+   <div class="actions">
+     <button type="button" class="primary" id="checkBtn">Проверить ответы</button>
+     <button type="button" class="secondary" id="resetBtn">🔄 Новые задания (Сброс)</button>
+   </div>
+   <div class="result" id="result" aria-live="polite">
+     <div class="lesson-head"><strong id="score">0 из 12</strong><span id="percent" class="pill">0%</span></div>
+     <p id="resultText"></p>
+   </div>
+  </section>
+</div>
+
+<div id="screenCreator" class="screen hidden">
+  <button type="button" class="nav-back" onclick="window.goToHome()">← На главную</button>
+  <section class="hero">
+    <div class="eyebrow">Конструктор</div>
+    <h1>Создать тест</h1>
+    <p class="sub">Составь задания, укажи правильные ответы и отправь тест ученикам через QR-код или ссылку.</p>
+  </section>
+
+  <section class="card">
+    <label class="creator-label">Название теста</label>
+    <input class="creator-input" id="testTitle" maxlength="100" placeholder="Например: Контрольная по математике">
+
+    <label class="creator-label">Описание</label>
+    <textarea class="creator-textarea" id="testDescription" maxlength="300" placeholder="Дополнительная информация (необязательно)"></textarea>
+
+    <div class="section-title" style="margin-top:4px">Вопросы</div>
+    <div id="questionEditors"></div>
+
+    <button type="button" class="secondary" style="width:100%;margin-top:10px" onclick="window.addQuestion()">＋ Добавить вопрос</button>
+    <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="window.publishTest()">Создать ссылку и QR-код</button>
+    <p class="creator-error" id="creatorError"></p>
+  </section>
+
+  <section class="card" id="shareResult" style="display:none">
+    <h2 style="margin:0 0 6px;font-size:19px">🎉 Тест готов</h2>
+    <p class="muted" style="margin:0 0 8px">Покажи QR-код ученикам или отправь им ссылку.</p>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+      <strong>Отсканируй камерой телефона</strong>
+    </div>
+    <label class="creator-label">Ссылка на тест</label>
+    <div class="share-url" id="shareUrl"></div>
+    <button type="button" class="primary" style="width:100%" onclick="window.copyLink()">Скопировать ссылку</button>
+    <p class="muted" style="margin-top:10px">Тест передаётся прямо в ссылке. Для работы на разных устройствах сайт должен быть опубликован в интернете.</p>
+  </section>
+</div>
+
+<div id="screenStudent" class="screen hidden">
+  <button type="button" class="nav-back" onclick="window.goToHome()">← На главную</button>
+  <section class="hero">
+    <div class="eyebrow">Тест по ссылке</div>
+    <h1 id="studentTitle">Тест</h1>
+    <p class="sub" id="studentDescription"></p>
+    <p class="muted" id="studentCount"></p>
+  </section>
+  <section class="card">
+    <div id="studentQuestions"></div>
+    <button type="button" class="primary" style="width:100%;margin-top:15px" id="submitStudent">Завершить тест</button>
+    <div class="result" id="studentResult"></div>
+  </section>
+</div>
+
+<div class="footer-container">
+  <p class="note">EduStep · Учебный проект. Все задания генерируются из базы знаний. Сайт адаптирован для смартфона и ПК.</p>
+  <div class="author-credits">Жуков Максим 9Д</div>
+</div>
+</div>
+
+<script>
+function formatText(str) {
+  if (!str) return '';
+  return String(str).replace(/\b(\d+)\/(\d+)\b/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+}
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function shuffle(array) {
+  let arr = array.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* ===================== БЕЗОПАСНЫЙ localStorage ===================== */
+function safeGetCompleted(){
+  try { return Number(localStorage.getItem('edustep_completed') || 0); }
+  catch(e){ return 0; }
+}
+function safeSetCompleted(v){
+  try { localStorage.setItem('edustep_completed', v); } catch(e){}
+}
+
+/* ===================== ГЕНЕРАТОРЫ ЗАДАНИЙ (РАСШИРЕННЫЕ) ===================== */
+const taskGenerators = {
+  /* ---------- МАТЕМАТИКА 1 КЛАСС ---------- */
+  'm1_1': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(2, 15), b = rand(1, 8); pool.push([`Сколько будет ${a} + ${b}?`, a+b, `Прибавь к ${a} сначала недостающее до 10, а затем остаток.`, `${a} + ${b} = ${a+b}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(8, 20), b = rand(1, 9); if(a - b < 0) continue; pool.push([`Вычисли: ${a} − ${b}`, a-b, `Уменьши число пошагово.`, `${a} − ${b} = ${a-b}.`]); }
+    for(let i=0; i<60; i++) { let a = rand(2, 9), b = rand(1, 6), c = rand(1, 5); pool.push([`Вычисли цепочку: ${a} + ${b} + ${c}`, a+b+c, `Сложи числа по порядку слева направо.`, `${a} + ${b} + ${c} = ${a+b+c}.`]); }
+    return pool;
+  },
+  'm1_2': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let n = rand(11, 19), units = n - 10; pool.push([`Сколько единиц в числе ${n}?`, units, `Число ${n} состоит из 1 десятка и единиц.`, `В числе ${n} ровно ${units} ед.`]); }
+    for(let i=0; i<80; i++) { let a = rand(10, 20), b = rand(10, 20); if(a === b) b++; let max = Math.max(a, b); pool.push([`Какое из чисел больше: ${a} или ${b}? Введи большее.`, max, `Сравни десятки и единицы.`, `Большее число — ${max}.`]); }
+    return pool;
+  },
+  'm1_3': () => {
+    const pool = [];
+    for(let i=0; i<70; i++) { let dm = rand(1, 9); pool.push([`Переведи в сантиметры: ${dm} дм.`, dm*10, `В одном дециметре 10 сантиметров.`, `${dm} дм = ${dm*10} см.`]); }
+    for(let i=0; i<70; i++) { let a = rand(4, 15), b = rand(2, 8); pool.push([`Отрезок длиной ${a} см увеличили на ${b} см. Чему равна новая длина?`, a+b, `Сложи исходную длину и добавку.`, `${a} + ${b} = ${a+b} см.`]); }
+    return pool;
+  },
+  'm1_4': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(1, 10), b = rand(1, 10); pool.push([`Сравни: ${a} и ${b}. Какое число меньше?`, Math.min(a,b), `Сравни числа.`, `Меньшее — ${Math.min(a,b)}.`]); }
+    for(let i=0; i<80; i++) { let n = rand(10, 19); pool.push([`Сколько десятков в числе ${n}?`, 1, `Число ${n} — это 1 десяток и единицы.`, `1 десяток.`]); }
+    return pool;
+  },
+
+  /* ---------- МАТЕМАТИКА 2 КЛАСС ---------- */
+  'm2_1': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(20, 70), b = rand(10, 28); pool.push([`Вычисли: ${a} + ${b}`, a+b, `Сложи десятки отдельно, единицы отдельно.`, `${a} + ${b} = ${a+b}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(40, 95), b = rand(11, 35); pool.push([`Вычисли: ${a} − ${b}`, a-b, `Вычти поразрядно.`, `${a} − ${b} = ${a-b}.`]); }
+    return pool;
+  },
+  'm2_2': () => {
+    const pool = [];
+    for(let a=2; a<=9; a++) { for(let b=2; b<=9; b++) { pool.push([`Вычисли: ${a} × ${b}`, a*b, `Таблица умножения.`, `${a} × ${b} = ${a*b}.`]); pool.push([`Вычисли: ${a*b} ÷ ${a}`, b, `Таблица деления.`, `${a*b} ÷ ${a} = ${b}.`]); } }
+    return pool;
+  },
+  'm2_3': () => {
+    const pool = [];
+    for(let i=0; i<70; i++) { let a = rand(3, 20); pool.push([`Найди периметр квадрата со стороной ${a} см.`, a*4, `У квадрата 4 равные стороны.`, `P = ${a} × 4 = ${a*4} см.`]); }
+    for(let i=0; i<70; i++) { let w = rand(3, 15), h = rand(2, 12); pool.push([`Найди периметр прямоугольника со сторонами ${w} см и ${h} см.`, (w+h)*2, `P = (длина + ширина) × 2.`, `P = (${w} + ${h}) × 2 = ${(w+h)*2} см.`]); }
+    return pool;
+  },
+  'm2_4': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(10, 99); pool.push([`Сколько десятков в числе ${a}?`, Math.floor(a/10), `Первая цифра — десятки.`, `Десятков: ${Math.floor(a/10)}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(10, 99); pool.push([`Сколько единиц в числе ${a}?`, a%10, `Вторая цифра — единицы.`, `Единиц: ${a%10}.`]); }
+    return pool;
+  },
+
+  /* ---------- МАТЕМАТИКА 3 КЛАСС ---------- */
+  'm3_1': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(150, 600), b = rand(120, 350); pool.push([`Вычисли в столбик: ${a} + ${b}`, a+b, `Сложи поразрядно с переносом.`, `${a} + ${b} = ${a+b}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(500, 950), b = rand(110, 390); pool.push([`Вычисли в столбик: ${a} − ${b}`, a-b, `Вычти в столбик с заёмами.`, `${a} − ${b} = ${a-b}.`]); }
+    return pool;
+  },
+  'm3_2': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(15, 60), b = rand(3, 9); pool.push([`Вычисли: ${a} × ${b}`, a*b, `Умножь разряды поочерёдно.`, `${a} × ${b} = ${a*b}.`]); }
+    for(let i=0; i<80; i++) { let b = rand(3, 9), res = rand(12, 50), a = b * res; pool.push([`Вычисли: ${a} ÷ ${b}`, res, `Раздели число.`, `${a} ÷ ${b} = ${res}.`]); }
+    return pool;
+  },
+  'm3_3': () => {
+    const pool = [];
+    for(let i=0; i<60; i++) { let n = rand(2, 8), val = rand(3, 15)*n; pool.push([`Найди 1/${n} от числа ${val}.`, val/n, `Раздели целое на знаменатель.`, `${val} ÷ ${n} = ${val/n}.`]); }
+    for(let i=0; i<60; i++) { let a = rand(4, 15), b = rand(3, 14); pool.push([`Найди площадь прямоугольника со сторонами ${a} см и ${b} см.`, a*b, `S = длина × ширина.`, `S = ${a} × ${b} = ${a*b} см².`]); }
+    return pool;
+  },
+  'm3_4': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(10, 99), b = rand(2, 9); pool.push([`Вычисли: ${a} × ${b}`, a*b, `Умножь двузначное на однозначное.`, `${a} × ${b} = ${a*b}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(20, 99), b = rand(10, 49); pool.push([`Вычисли: ${a} + ${b}`, a+b, `Сложи в столбик.`, `${a} + ${b} = ${a+b}.`]); }
+    return pool;
+  },
+
+  /* ---------- МАТЕМАТИКА 4 КЛАСС ---------- */
+  'm4_1': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(1200, 6000), b = rand(1100, 3500); pool.push([`Вычисли: ${a} + ${b}`, a+b, `Сложи тысячи, сотни, десятки и единицы.`, `${a} + ${b} = ${a+b}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(5000, 9800), b = rand(1300, 4200); pool.push([`Вычисли: ${a} − ${b}`, a-b, `Вычти в столбик.`, `${a} − ${b} = ${a-b}.`]); }
+    return pool;
+  },
+  'm4_2': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(15, 50), b = rand(12, 25); pool.push([`Вычисли: ${a} × ${b}`, a*b, `Умножь на двузначное число.`, `${a} × ${b} = ${a*b}.`]); }
+    for(let i=0; i<80; i++) { let b = rand(12, 22), res = rand(12, 35), a = b * res; pool.push([`Вычисли: ${a} ÷ ${b}`, res, `Раздели на двузначное число.`, `${a} ÷ ${b} = ${res}.`]); }
+    return pool;
+  },
+  'm4_3': () => {
+    const pool = [];
+    for(let i=0; i<120; i++) { let den = rand(4, 10), num = rand(2, den-1), base = rand(2, 12)*den; let ans = (base / den) * num; pool.push([`Найди ${num}/${den} от числа ${base}.`, ans, `Раздели на знаменатель и умножь на числитель.`, `(${base} ÷ ${den}) × ${num} = ${ans}.`]); }
+    return pool;
+  },
+  'm4_4': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(100, 999); pool.push([`Сколько сотен в числе ${a}?`, Math.floor(a/100), `Первая цифра — сотни.`, `Сотен: ${Math.floor(a/100)}.`]); }
+    for(let i=0; i<80; i++) { let a = rand(100, 999); pool.push([`Сколько всего десятков в числе ${a}?`, Math.floor(a/10), `Отбрось последнюю цифру.`, `Десятков: ${Math.floor(a/10)}.`]); }
+    return pool;
+  },
+
+  /* ---------- МАТЕМАТИКА 5 КЛАСС ---------- */
+  'm5_1': () => {
+    const pool = [];
+    for(let i=0; i<60; i++) { let d = rand(6, 16), a = rand(1, d-3), b = rand(1, d-a-1); pool.push([`Вычисли: ${a}/${d} + ${b}/${d}. Ответ запиши в виде дроби (например, ${a+b}/${d}).`, `${a+b}/${d}`, `Сложи числители при общем знаменателе.`, `Ответ: ${a+b}/${d}.`]); }
+    for(let i=0; i<60; i++) { let d = rand(7, 18), a = rand(4, d-1), b = rand(1, a-1); pool.push([`Вычисли: ${a}/${d} − ${b}/${d}. Ответ запиши в виде дроби.`, `${a-b}/${d}`, `Вычти числители.`, `Ответ: ${a-b}/${d}.`]); }
+    return pool;
+  },
+  'm5_2': () => {
+    const pool = [];
+    for(let i=0; i<60; i++) { let a = (rand(10, 95)/10).toFixed(1), b = (rand(10, 95)/10).toFixed(1); let sum = (parseFloat(a) + parseFloat(b)).toFixed(1).replace('.',','); let aStr = a.replace('.',','), bStr = b.replace('.',','); pool.push([`Вычисли: ${aStr} + ${bStr}. Ответ запиши с запятой.`, sum, `Сложи с выравниванием запятых.`, `${aStr} + ${bStr} = ${sum}.`]); }
+    for(let i=0; i<60; i++) { let a = (rand(40, 99)/10).toFixed(1), b = (rand(10, 38)/10).toFixed(1); let diff = (parseFloat(a) - parseFloat(b)).toFixed(1).replace('.',','); let aStr = a.replace('.',','), bStr = b.replace('.',','); pool.push([`Вычисли: ${aStr} − ${bStr}. Ответ запиши с запятой.`, diff, `Вычти десятичные дроби.`, `${aStr} − ${bStr} = ${diff}.`]); }
+    return pool;
+  },
+  'm5_3': () => {
+    const pool = [];
+    for(let i=0; i<60; i++) { let p = rand(1, 9)*10, num = rand(2, 25)*10; let ans = (num * p) / 100; pool.push([`Найди ${p}% от числа ${num}.`, ans, `Раздели число на 100 и умножь на процент.`, `${p}% от ${num} = ${ans}.`]); }
+    for(let i=0; i<60; i++) { let price = rand(15, 60)*10, disc = rand(1, 5)*10; let finalPrice = price - (price * disc / 100); pool.push([`Товар стоит ${price} руб. Скидка ${disc}%. Какова новая цена?`, finalPrice, `Вычти скидку из начальной стоимости.`, `Цена со скидкой: ${finalPrice} руб.`]); }
+    return pool;
+  },
+  'm5_4': () => {
+    const pool = [];
+    for(let i=0; i<80; i++) { let a = rand(1, 9), b = rand(1, 9); pool.push([`Вычисли: ${a}/${b} × 10. Ответ с запятой.`, ((a/b)*10).toFixed(1).replace('.',','), `Умножь дробь на 10.`, `${a}/${b} × 10 = ${((a/b)*10).toFixed(1).replace('.',',')}.`]); }
+    for(let i=0; i<80; i++) { let p = rand(1, 9)*10; pool.push([`Переведи ${p}% в десятичную дробь. Ответ с запятой.`, (p/100).toFixed(2).replace('.',','), `Раздели на 100.`, `${p}% = ${(p/100).toFixed(2).replace('.',',')}.`]); }
+    return pool;
+  },
+
+  /* ---------- РУССКИЙ ЯЗЫК 1 КЛАСС ---------- */
+  'r1_1': () => shuffle([
+    ['Сколько гласных букв в слове «Книга»?', 2, 'Гласные буквы: И, А. Всего 2.', '2 гласные буквы.'],
+    ['Вставь пропущенную букву: ш...шка', 'и', 'ЖИ-ШИ пиши с буквой И!', 'Буква и.'],
+    ['Сколько букв в слове «Ёж»?', 2, 'Посчитай знаки.', '2 буквы.'],
+    ['Какая первая буква в слове «Арбуз»?', 'а', 'Первая буква.', 'Буква а.'],
+    ['Сколько звуков в слове «Мяч»?', 3, "[м'], [а], [ч'].", '3 звука.'],
+    ['Вставь пропущенную букву: ж...ли', 'и', 'Правило ЖИ-ШИ.', 'Буква и.'],
+    ['Сколько согласных в слове «Кот»?', 2, 'К, т.', '2 согласных.'],
+    ['Какая гласная в слове «Дом»?', 'о', 'Гласная о.', 'Буква о.'],
+    ['На какую букву начинается слово «Школа»?', 'ш', 'Буква ш.', 'Буква ш.'],
+    ['Сколько слогов в слове «Ма-ма»?', 2, 'Два слога.', '2 слога.'],
+    ['Сколько гласных звуков в русском языке?', 6, 'Звуки: [а], [о], [у], [ы], [э], [и].', '6 гласных звуков.'],
+    ['Сколько букв в алфавите?', 33, '33 буквы.', '33 буквы.'],
+    ['Вставь букву: л...мон', 'и', 'Словарное слово.', 'Буква и.'],
+    ['Сколько слогов в слове «Апельсин»?', 3, 'А-пель-син.', '3 слога.'],
+    ['Вставь букву: к...шка', 'о', 'Кошка.', 'Буква о.'],
+    ['Сколько гласных в слове «Ручка»?', 2, 'У, а.', '2 гласные.'],
+    ['Сколько согласных в слове «Стол»?', 3, 'С, т, л.', '3 согласных.'],
+    ['Какая последняя буква в слове «Окно»?', 'о', 'Окно.', 'Буква о.'],
+    ['Сколько слогов в слове «Дом»?', 1, 'Один слог.', '1 слог.'],
+    ['Вставь букву: м...ч', 'я', 'Мяч.', 'Буква я.']
+  ]),
+  'r1_2': () => shuffle([
+    ['Вставь букву: ч...сы', 'а', 'ЧА-ЩА пиши с А.', 'Буква а.'],
+    ['Вставь букву: ч...до', 'у', 'ЧУ-ЩУ пиши с У.', 'Буква у.'],
+    ['Вставь букву: снеж...нка', 'и', 'ЖИ-ШИ пиши с И.', 'Буква и.'],
+    ['Вставь букву: щ...ка', 'у', 'ЧУ-ЩУ пиши с У.', 'Буква у.'],
+    ['Вставь букву: маш...на', 'и', 'ЖИ-ШИ пиши с И.', 'Буква и.'],
+    ['Вставь букву: рощ...', 'а', 'ЧА-ЩА пиши с А.', 'Буква а.'],
+    ['Вставь букву: ч...ща', 'а', 'ЧА-ЩА пиши с А.', 'Буква а.'],
+    ['Вставь букву: ж...вотное', 'и', 'ЖИ-ШИ пиши с И.', 'Буква и.'],
+    ['Вставь букву: ч...лан', 'у', 'ЧУ-ЩУ пиши с У.', 'Буква у.'],
+    ['Вставь букву: ш...м', 'у', 'ШУМ пиши с У.', 'Буква у.'],
+    ['Вставь букву: ж...знь', 'и', 'ЖИ-ШИ пиши с И.', 'Буква и.'],
+    ['Вставь букву: ч...йка', 'а', 'ЧА-ЩА пиши с А.', 'Буква а.'],
+    ['Вставь букву: щ...вель', 'а', 'ЧА-ЩА пиши с А.', 'Буква а.'],
+    ['Вставь букву: ч...деса', 'у', 'ЧУ-ЩУ пиши с У.', 'Буква у.'],
+    ['Вставь букву: камыш...', 'и', 'ЖИ-ШИ пиши с И.', 'Буква и.']
+  ]),
+  'r1_3': () => shuffle([
+    ['Сколько слов в предложении «Наступила золотая осень»?', 3, 'Слова пишутся раздельно.', '3 слова.'],
+    ['С какой буквы пишется первое слово в предложении?', 'сбольшой', 'Первое слово — с заглавной.', 'С большой (заглавной).'],
+    ['Какой знак ставится в конце вопроса?', '?', 'Вопросительный знак.', 'Вопросительный знак (?).'],
+    ['Какой знак ставится в конце восклицания?', '!', 'Восклицательный знак.', 'Восклицательный знак (!).'],
+    ['Сколько слов в предложении «Кот спит»?', 2, 'Кот и спит — два слова.', '2 слова.'],
+    ['Какой знак ставится в конце спокойного предложения?', '.', 'Точка.', 'Точка (.).'],
+    ['Пишутся ли слова в предложении слитно?', 'нет', 'Слова пишутся раздельно.', 'Нет, раздельно.'],
+    ['С какой буквы пишется имя человека?', 'сбольшой', 'Имена — с заглавной.', 'С большой (заглавной).'],
+    ['Сколько предложений в тексте «Светит солнце. Поют птицы.»?', 2, 'Две точки — два предложения.', '2 предложения.'],
+    ['Нужен ли пробел между словами?', 'да', 'Слова разделяются пробелом.', 'Да.'],
+    ['С какой буквы пишется название города?', 'сбольшой', 'С заглавной.', 'С большой (заглавной).'],
+    ['Что ставится в конце побуждения к действию?', '.', 'Обычно точка.', 'Точка (или восклицательный знак).']
+  ]),
+
+  /* ---------- РУССКИЙ ЯЗЫК 2 КЛАСС ---------- */
+  'r2_1': () => shuffle([
+    ['Вставь букву: в...да (проверочное во́ды)', 'о', 'Во́ды — вода.', 'Буква о.'],
+    ['Вставь букву: л...са (проверочное ли́с)', 'и', 'Ли́с — лиса.', 'Буква и.'],
+    ['Вставь букву: з...ма (проверочное зи́мы)', 'и', 'Зи́мы — зима.', 'Буква и.'],
+    ['Вставь букву: т...ва (проверочное тра́вы)', 'а', 'Тра́вы — трава.', 'Буква а.'],
+    ['Вставь букву: м...ря (проверочное мо́ре)', 'о', 'Мо́ре — моря.', 'Буква о.'],
+    ['Вставь букву: с...на (проверочное со́сны)', 'о', 'Со́сны — сосна.', 'Буква о.'],
+    ['Вставь букву: ст...на (проверочное сте́ны)', 'е', 'Сте́ны — стена.', 'Буква е.'],
+    ['Вставь букву: гр...за (проверочное гро́зы)', 'о', 'Гро́зы — гроза.', 'Буква о.'],
+    ['Вставь букву: п...тно (проверочное пя́тна)', 'я', 'Пя́тна — пятно.', 'Буква я.'],
+    ['Вставь букву: р...ка (проверочное ре́ки)', 'е', 'Ре́ки — река.', 'Буква е.'],
+    ['Вставь букву: х...лмы (проверочное холм)', 'о', 'Холм — холмы.', 'Буква о.'],
+    ['Вставь букву: сн...га (проверочное снег)', 'е', 'Снег — снега.', 'Буква е.'],
+    ['Вставь букву: стр...на (проверочное стра́ны)', 'а', 'Стра́ны — страна.', 'Буква а.'],
+    ['Вставь букву: з...мля (проверочное зе́мли)', 'е', 'Зе́мли — земля.', 'Буква е.']
+  ]),
+  'r2_2': () => shuffle([
+    ['Вставь букву: ду... (проверочное дубы)', 'б', 'Дубы — дуб.', 'Буква б.'],
+    ['Вставь букву: сне... (проверочное снега)', 'г', 'Снега — снег.', 'Буква г.'],
+    ['Вставь букву: моро... (проверочное морозы)', 'з', 'Морозы — мороз.', 'Буква з.'],
+    ['Вставь букву: гла... (проверочное глаза)', 'з', 'Глаза — глаз.', 'Буква з.'],
+    ['Вставь букву: эта... (проверочное этажи)', 'ж', 'Этажи — этаж.', 'Буква ж.'],
+    ['Вставь букву: огоро... (проверочное огороды)', 'д', 'Огороды — огород.', 'Буква д.'],
+    ['Вставь букву: ло...ка (проверочное ложка)', 'ж', 'Ложка — ложка.', 'Буква ж.'],
+    ['Вставь букву: кни...ка (проверочное книжечка)', 'ж', 'Книжечка — книжка.', 'Буква ж.'],
+    ['Вставь букву: тра...ка (проверочное трава)', 'в', 'Трава — травка.', 'Буква в.'],
+    ['Вставь букву: у...кий (проверочное узок)', 'з', 'Узок — узкий.', 'Буква з.'],
+    ['Вставь букву: сла...кий (проверочное сладок)', 'д', 'Сладок — сладкий.', 'Буква д.'],
+    ['Вставь букву: ни...кий (проверочное низок)', 'з', 'Низок — низкий.', 'Буква з.'],
+    ['Вставь букву: берез...ка (проверочное берёза)', 'к', 'Берёза — берёзка.', 'Буква к.']
+  ]),
+  'r2_3': () => shuffle([
+    ['С какой буквы пишется город Москва?', 'сбольшой', 'Названия городов — с заглавной.', 'С большой (заглавной).'],
+    ['С какой буквы пишется кот Барсик?', 'сбольшой', 'Клички животных — с заглавной.', 'С большой (заглавной).'],
+    ['С какой буквы пишется река Волга?', 'сбольшой', 'Названия рек — с заглавной.', 'С большой (заглавной).'],
+    ['Пишется ли с заглавной слово «школа»?', 'нет', 'Это нарицательное слово.', 'Нет, с маленькой.'],
+    ['Пишется ли с заглавной слово «мама»?', 'нет', 'Это нарицательное слово.', 'Нет, с маленькой.'],
+    ['С какой буквы пишется фамилия Пушкин?', 'сбольшой', 'Фамилии — с заглавной.', 'С большой (заглавной).'],
+    ['С какой буквы пишется имя Саша?', 'сбольшой', 'Имена — с заглавной.', 'С большой (заглавной).'],
+    ['Пишется ли с заглавной слово «собака»?', 'нет', 'Это нарицательное слово.', 'Нет, с маленькой.'],
+    ['С какой буквы пишется страна Россия?', 'сбольшой', 'Названия стран — с заглавной.', 'С большой (заглавной).'],
+    ['С какой буквы пишется улица Садовая?', 'сбольшой', 'Названия улиц — с заглавной.', 'С большой (заглавной).'],
+    ['С какой буквы пишется отчество Иванович?', 'сбольшой', 'Отчества — с заглавной.', 'С большой (заглавной).'],
+    ['Пишется ли с заглавной слово «город»?', 'нет', 'Нарицательное.', 'Нет, с маленькой.']
+  ]),
+
+  /* ---------- РУССКИЙ ЯЗЫК 3 КЛАСС ---------- */
+  'r3_1': () => shuffle([
+    ['Укажи корень в слове «Подводный».', 'вод', 'Однокоренные: вода, водный.', 'Корень вод.'],
+    ['Какая приставка в слове «Прочитал»?', 'про', 'Приставка стоит перед корнем.', 'Приставка про.'],
+    ['Укажи окончание в слове «Школа».', 'а', 'Измени слово: школы, школе.', 'Окончание а.'],
+    ['Какой суффикс в слове «Домик»?', 'ик', 'Суффикс -ик.', 'Суффикс ик.'],
+    ['Выдели корень в слове «Зимний».', 'зим', 'Зима, зимний.', 'Корень зим.'],
+    ['Какая приставка в слове «Забежал»?', 'за', 'Приставка за-.', 'Приставка за.'],
+    ['Какое окончание в слове «Столы»?', 'ы', 'Измени: стол.', 'Окончание ы.'],
+    ['Выдели корень в слове «Лесной».', 'лес', 'Лес, лесок.', 'Корень лес.'],
+    ['Найди суффикс в слове «Грибник».', 'ник', 'Суффикс -ник.', 'Суффикс ник.'],
+    ['Есть ли окончание в слове «Кенгуру»?', 'нет', 'Неизменяемое слово.', 'Окончания нет (слово неизменяемое).'],
+    ['Выдели корень в слове «Домишко».', 'дом', 'Дом, домик.', 'Корень дом.'],
+    ['Какая приставка в слове «Переход»?', 'пере', 'Приставка пере-.', 'Приставка пере.'],
+    ['Какой суффикс в слове «Столик»?', 'ик', 'Суффикс -ик.', 'Суффикс ик.'],
+    ['Какое окончание в слове «Книги»?', 'и', 'Измени: книга.', 'Окончание и.']
+  ]),
+  'r3_2': () => shuffle([
+    ['На какой вопрос отвечает имя существительное?', 'кточто', 'Кто? Что?', 'Кто? Что?'],
+    ['На какой вопрос отвечает имя прилагательное?', 'какой', 'Какой? Какая? Какое?', 'Какой? Какая? Какое?'],
+    ['На какой вопрос отвечает глагол?', 'чтоделать', 'Что делать? Что сделать?', 'Что делать? Что сделать?'],
+    ['Что обозначает имя существительное?', 'предмет', 'Предмет.', 'Предмет.'],
+    ['Что обозначает имя прилагательное?', 'признак', 'Признак предмета.', 'Признак предмета.'],
+    ['Что обозначает глагол?', 'действие', 'Действие предмета.', 'Действие предмета.'],
+    ['Какая часть речи слово «бежать»?', 'глагол', 'Отвечает на вопрос «что делать?».', 'Глагол.'],
+    ['Какая часть речи слово «красивый»?', 'прилагательное', 'Отвечает на вопрос «какой?».', 'Прилагательное.'],
+    ['Какая часть речи слово «стол»?', 'существительное', 'Отвечает на вопрос «что?».', 'Существительное.'],
+    ['Какая часть речи слово «солнце»?', 'существительное', 'Отвечает на вопрос «что?».', 'Существительное.'],
+    ['Какая часть речи слово «быстро»?', 'наречие', 'Отвечает на вопрос «как?».', 'Наречие.'],
+    ['Какая часть речи слово «пять»?', 'числительное', 'Обозначает число.', 'Числительное.'],
+    ['Какая часть речи слово «он»?', 'местоимение', 'Указывает на предмет.', 'Местоимение.'],
+    ['Какая часть речи слово «и»?', 'союз', 'Служебная часть речи.', 'Союз.']
+  ]),
+  'r3_3': () => shuffle([
+    ['Что такое подлежащее?', 'главныйчлен', 'Главный член предложения.', 'Главный член предложения.'],
+    ['Что такое сказуемое?', 'главныйчлен', 'Главный член предложения.', 'Главный член предложения.'],
+    ['На какой вопрос отвечает подлежащее?', 'кточто', 'Кто? Что?', 'Кто? Что?'],
+    ['На какой вопрос отвечает сказуемое?', 'чтоделает', 'Что делает?', 'Что делает?'],
+    ['Найди подлежащее: «Птицы улетают на юг».', 'птицы', 'Кто улетает? Птицы.', 'Птицы.'],
+    ['Найди сказуемое: «Птицы улетают на юг».', 'улетают', 'Что делают? Улетают.', 'Улетают.'],
+    ['Сколько главных членов в основе предложения?', 2, 'Подлежащее и сказуемое.', '2 (подлежащее и сказуемое).'],
+    ['Найди подлежащее: «Дети играют в мяч».', 'дети', 'Кто играет? Дети.', 'Дети.'],
+    ['Найди сказуемое: «Дети играют в мяч».', 'играют', 'Что делают? Играют.', 'Играют.'],
+    ['Является ли слово «в» членом предложения?', 'нет', 'Это предлог.', 'Нет, это предлог.'],
+    ['Найди подлежащее: «Солнце светит ярко».', 'солнце', 'Что светит? Солнце.', 'Солнце.'],
+    ['Найди сказуемое: «Солнце светит ярко».', 'светит', 'Что делает? Светит.', 'Светит.'],
+    ['Найди подлежащее: «Кот ловит мышь».', 'кот', 'Кто ловит? Кот.', 'Кот.'],
+    ['Найди сказуемое: «Кот ловит мышь».', 'ловит', 'Что делает? Ловит.', 'Ловит.']
+  ]),
+
+  /* ---------- РУССКИЙ ЯЗЫК 4 КЛАСС ---------- */
+  'r4_1': () => shuffle([
+    ['Сколько падежей в русском языке?', 6, 'Именительный, Родительный, Дательный, Винительный, Творительный, Предложный.', '6 падежей.'],
+    ['На какие вопросы отвечает Именительный падеж?', 'кточто', 'Кто? Что?', 'Кто? Что?'],
+    ['Вспомогательное слово для Родительного падежа («нет...»)', 'нет', 'Нет кого? чего?', 'Нет.'],
+    ['Вспомогательное слово для Дательного падежа («рад...»)', 'рад', 'Рад кому? чему?', 'Рад.'],
+    ['Какой падеж отвечает на вопросы «кого? что?»', 'винительный', 'Винительный падеж.', 'Винительный.'],
+    ['Вспомогательное слово для Творительного падежа («доволен...»)', 'доволен', 'Доволен кем? чем?', 'Доволен.'],
+    ['Вспомогательное слово для Предложного падежа («думаю о...»)', 'о', 'О ком? о чём?', 'Предложный (думаю о...).'],
+    ['Какой падеж не имеет предлогов?', 'именительный', 'И.п. всегда без предлога.', 'Именительный.'],
+    ['На какие вопросы отвечает Дательный падеж?', 'комучему', 'Кому? Чему?', 'Кому? Чему?'],
+    ['Сколько падежных вопросов у каждого падежа?', 2, 'Два вопроса.', 'Два вопроса.'],
+    ['На какие вопросы отвечает Творительный падеж?', 'кемчем', 'Кем? Чем?', 'Кем? Чем?'],
+    ['На какие вопросы отвечает Предложный падеж?', 'окомочём', 'О ком? О чём?', 'О ком? О чём?']
+  ]),
+  'r4_2': () => shuffle([
+    ['Сколько спряжений у глагола?', 2, 'I и II спряжение.', '2 (I и II).'],
+    ['Глаголы на -ИТЬ относятся к какому спряжению?', 'второе', 'II спряжение.', 'Ко II спряжению.'],
+    ['Какое спряжение у глагола «строить»?', 'второе', 'На -ить.', 'II спряжение.'],
+    ['Какое спряжение у глагола «читать»?', 'первое', 'На -ать.', 'I спряжение.'],
+    ['Глагол «гнать» — это исключение. Какое спряжение?', 'второе', 'II спряжение.', 'II спряжение.'],
+    ['Глагол «видеть» — это исключение. Какое спряжение?', 'второе', 'II спряжение.', 'II спряжение.'],
+    ['Глагол «брить» — исключение. Какое спряжение?', 'первое', 'I спряжение.', 'I спряжение.'],
+    ['Глагол «стелить» — исключение. Какое спряжение?', 'первое', 'I спряжение.', 'I спряжение.'],
+    ['Сколько глаголов-исключений на -ЕТЬ и -АТЬ?', 11, '11 глаголов.', '11 глаголов.'],
+    ['Какое спряжение у глагола «дышать»?', 'второе', 'Исключение, II спряжение.', 'II спряжение.'],
+    ['Какое спряжение у глагола «писать»?', 'первое', 'На -ать.', 'I спряжение.'],
+    ['Какое спряжение у глагола «смотреть»?', 'второе', 'Исключение, II спряжение.', 'II спряжение.']
+  ]),
+  'r4_3': () => shuffle([
+    ['Что такое однородные члены предложения?', 'отвечаютнаодинвопрос', 'Отвечают на один вопрос.', 'Отвечают на один вопрос.'],
+    ['Ставится ли запятая перед союзом А?', 'да', 'Перед А, НО — запятая.', 'Да.'],
+    ['Ставится ли запятая перед союзом НО?', 'да', 'Перед А, НО — запятая.', 'Да.'],
+    ['Нужна ли запятая между однородными членами без союзов?', 'да', 'Запятая ставится.', 'Да.'],
+    ['Найди однородные члены: «На столе лежали яблоки, груши и сливы».', 'яблокигрушисливы', 'Перечисление.', 'Яблоки, груши, сливы.'],
+    ['Ставится ли запятая перед И между однородными членами?', 'нет', 'Перед одиночным И — нет.', 'Нет (при одиночном И).'],
+    ['Сколько однородных членов: «красный, синий и зелёный»?', 3, 'Три цвета.', '3.'],
+    ['Являются ли «быстро» и «медленно» однородными?', 'да', 'Оба наречия.', 'Да.'],
+    ['Нужна ли запятая: «Он читал и писал»?', 'нет', 'Одиночный союз И.', 'Нет.'],
+    ['Нужна ли запятая: «Он читал, а она писала»?', 'да', 'Перед союзом А.', 'Да.'],
+    ['Нужна ли запятая: «В лесу росли грибы, ягоды и орехи»?', 'да', 'Перечисление.', 'Да.'],
+    ['Нужна ли запятая: «Солнце светит и греет»?', 'нет', 'Одиночный союз И.', 'Нет.']
+  ]),
+
+  /* ---------- РУССКИЙ ЯЗЫК 5 КЛАСС ---------- */
+  'r5_1': () => shuffle([
+    ['Напиши антоним к слову «тёмный».', 'светлый', 'Противоположное слово.', 'Светлый.'],
+    ['Напиши синоним к слову «огонь».', 'пламя', 'Близкое по смыслу.', 'Пламя.'],
+    ['Напиши антоним к слову «друг».', 'враг', 'Противоположность.', 'Враг.'],
+    ['Как называются слова с противоположным значением?', 'антонимы', 'Антонимы.', 'Антонимы.'],
+    ['Как называются слова, близкие по значению?', 'синонимы', 'Синонимы.', 'Синонимы.'],
+    ['Напиши антоним к слову «день».', 'ночь', 'Противоположность.', 'Ночь.'],
+    ['Напиши синоним к слову «шагать».', 'идти', 'Подойдёт: идти, ступать, маршировать.', 'Идти (или ступать).'],
+    ['Напиши антоним к слову «широкий».', 'узкий', 'Противоположность.', 'Узкий.'],
+    ['Слова «ключ» (от замка) и «ключ» (родник) — это ...', 'омонимы', 'Омонимы.', 'Омонимы.'],
+    ['Напиши синоним к слову «быстрый».', 'скорый', 'Или мгновенный, резкий.', 'Скорый.'],
+    ['Напиши антоним к слову «холодный».', 'горячий', 'Противоположность.', 'Горячий.'],
+    ['Напиши синоним к слову «храбрый».', 'смелый', 'Близкое по смыслу.', 'Смелый.'],
+    ['Напиши антоним к слову «высокий».', 'низкий', 'Противоположность.', 'Низкий.'],
+    ['Напиши синоним к слову «красивый».', 'прекрасный', 'Близкое по смыслу.', 'Прекрасный.']
+  ]),
+  'r5_2': () => shuffle([
+    ['Что значит «бить баклуши»?', 'бездельничать', 'Фразеологизм.', 'Бездельничать.'],
+    ['Что значит «водить за нос»?', 'обманывать', 'Фразеологизм.', 'Обманывать.'],
+    ['Что значит «спустя рукава»?', 'плохо', 'Фразеологизм.', 'Делать плохо, небрежно.'],
+    ['Что значит «как рыба в воде»?', 'уверенно', 'Фразеологизм.', 'Уверенно, свободно.'],
+    ['Что значит «засучив рукава»?', 'усердно', 'Фразеологизм.', 'Усердно, старательно.'],
+    ['Что значит «кот наплакал»?', 'мало', 'Фразеологизм.', 'Очень мало.'],
+    ['Что значит «во весь дух»?', 'быстро', 'Фразеологизм.', 'Очень быстро.'],
+    ['Что значит «ни свет ни заря»?', 'рано', 'Фразеологизм.', 'Очень рано.'],
+    ['Что значит «рукой подать»?', 'близко', 'Фразеологизм.', 'Совсем близко.'],
+    ['Что значит «душа в пятки ушла»?', 'испугался', 'Фразеологизм.', 'Сильно испугался.'],
+    ['Что значит «как две капли воды»?', 'похожи', 'Фразеологизм.', 'Очень похожи.'],
+    ['Что значит «не покладая рук»?', 'усердно', 'Фразеологизм.', 'Без отдыха, усердно.']
+  ]),
+  'r5_3': () => shuffle([
+    ['В корне -ЛАГ- / -ЛОЖ- перед Г пишется ...?', 'а', 'Полага́ть.', 'Буква а.'],
+    ['В корне -ЛАГ- / -ЛОЖ- перед Ж пишется ...?', 'о', 'Положи́ть.', 'Буква о.'],
+    ['В корне -РАСТ- / -РАЩ- / -РОС- перед СТ пишется ...?', 'а', 'Расти.', 'Буква а.'],
+    ['В корне -РАСТ- / -РАЩ- / -РОС- перед С пишется ...?', 'о', 'Вырос.', 'Буква о.'],
+    ['В корне -РАСТ- / -РАЩ- / -РОС- перед Щ пишется ...?', 'а', 'Выращивать.', 'Буква а.'],
+    ['Выбери правильное написание: «предл...гать»', 'а', 'Перед Г — А.', 'Предлагать.'],
+    ['Выбери правильное написание: «предл...жить»', 'о', 'Перед Ж — О.', 'Предложить.'],
+    ['Выбери правильное написание: «р...сти»', 'а', 'Перед СТ — А.', 'Расти.'],
+    ['Выбери правильное написание: «выр...с»', 'о', 'Перед С — О.', 'Вырос.'],
+    ['Выбери правильное написание: «выр...щивать»', 'а', 'Перед Щ — А.', 'Выращивать.'],
+    ['Выбери правильное написание: «прил...гать»', 'а', 'Перед Г — А.', 'Прилагать.'],
+    ['Выбери правильное написание: «сл...жение»', 'о', 'Перед Ж — О.', 'Сложение.']
+  ])
+};
+
+function generateTestTasks(subject, grade, topicIndex) {
+  const key = (subject === 'math' ? 'm' : 'r') + grade + '_' + (topicIndex + 1);
+  let rawPool = [];
+  if (taskGenerators[key]) rawPool = taskGenerators[key]();
+  if (!rawPool || rawPool.length === 0) {
+    const base = curriculum[subject][grade][topicIndex].tasks || [];
+    rawPool = shuffle(base);
+  } else {
+    rawPool = shuffle(rawPool);
+  }
+  return rawPool.slice(0, 12);
+}
+
+/* ===================== БАЗА ЗНАНИЙ (РАСШИРЕННАЯ) ===================== */
+const curriculum = {
+  math: {
+    name: 'Математика',
+    1: [
+      { title: 'Сложение и вычитание в пределах 20', theory: 'Сложение — это арифметическое действие объединения двух и более групп предметов в одну общую группу. Числа при сложении называются: первое слагаемое, второе слагаемое и сумма.<br><br>Вычитание — действие, обратное сложению. Оно показывает, насколько одна величина больше или меньше другой. Компоненты вычитания: уменьшаемое, вычитаемое и разность.<br><br>Метод прибавления по частям: чтобы к 8 прибавить 5, разложи 5 на 2 и 3. Сначала добейся круглого десятка (8 + 2 = 10), а затем прибавь оставшуюся часть (10 + 3 = 13).', example: 'Разберём задачу: у Пети было 9 карандашей, а у Кати — на 4 больше. Сколько всего?<br>1) 9 + 4 = 9 + 1 + 3 = 13 (карандашей у Кати).<br>2) 9 + 13 = 22 карандаша у двоих детей.' },
+      { title: 'Состав числа и сравнение', theory: 'Любое двузначное число состоит из десятков и единиц. Например, число 17 включает 1 десяток и 7 единиц (17 = 10 + 7).<br><br>Знаки сравнения:<br>• больше (>): левое число крупнее правого (18 > 12).<br>• меньше (<): левое число меньше правого (11 < 15).<br>• равно (=): количества абсолютно одинаковы.<br><br>При сравнении чисел всегда сначала смотри на количество десятков. Если они равны — сравнивай единицы.', example: 'Сравним 14 и 19: в обоих числах по 1 десятку. Смотрим на единицы: 4 < 9. Следовательно, 14 < 19.' },
+      { title: 'Задачи и величины (см, дм)', theory: 'Единицы измерения длины помогают точно измерять предметы.<br>• 1 сантиметр (см) — длина примерно двух тетрадных клеток.<br>• 1 дециметр (дм) — крупная единица, равная ровно 10 сантиметрам.<br><br>Перевод величин:<br>• Чтобы перевести дециметры в сантиметры, умножь количество дециметров на 10 (3 дм = 30 см).<br>• Чтобы перевести сантиметры в дециметры, раздели число на 10.', example: 'Отрезок длиной 2 дм 4 см. Переведём в см: 2 дм = 20 см, да ещё 4 см = 24 см.' },
+      { title: 'Десятки и единицы', theory: 'В двузначном числе первая цифра справа — единицы, вторая — десятки. Например, в числе 15: 1 десяток и 5 единиц.<br><br>Чтобы узнать количество десятков, отбрось последнюю цифру. Чтобы узнать количество единиц, посмотри на последнюю цифру.', example: 'В числе 18: 1 десяток и 8 единиц. В числе 20: 2 десятка и 0 единиц.' }
+    ],
+    2: [
+      { title: 'Устное сложение и вычитание в пределах 100', theory: 'Главное правило устного счёта: десятки складываем с десятками, единицы — с единицами!<br><br>При вычитании с переходом через десяток удобнее разлагать вычитаемое на удобные слагаемые.<br>Пример: 52 − 7. Разложи 7 на 2 и 5. Сначала вычти 2 (52 − 2 = 50), а затем вычти 5 (50 − 5 = 45).', example: 'Вычислим 46 + 35:<br>1) 40 + 30 = 70<br>2) 6 + 5 = 11<br>3) 70 + 11 = 81.' },
+      { title: 'Таблица умножения и деления', theory: 'Умножение — это краткая запись сложения одинаковых слагаемых. Числа при умножении: множитель × множитель = произведение.<br><br>Деление — действие, обратное умножению. Компоненты: делимое ÷ делитель = частное.<br><br>Если произведение разделить на один из множителей, получится другой множитель!', example: 'Если 6 × 7 = 42, то 42 ÷ 6 = 7 и 42 ÷ 7 = 6.' },
+      { title: 'Периметр геометрических фигур', theory: 'Периметр (P) — это сумма длин всех сторон геометрической фигуры.<br><br>• Периметр квадрата: P = a × 4 (так как у квадрата все 4 стороны равны).<br>• Периметр прямоугольника: P = (a + b) × 2, где a — длина, b — ширина.<br>• Периметр равностороннего треугольника: P = a × 3.', example: 'Прямоугольник со сторонами 6 см и 4 см имеет периметр: P = (6 + 4) × 2 = 10 × 2 = 20 см.' },
+      { title: 'Разряды двузначных чисел', theory: 'В двузначном числе два разряда: десятки и единицы. Например, в числе 47 — 4 десятка и 7 единиц.<br><br>Чтобы узнать число десятков, раздели число на 10 и возьми целую часть. Чтобы узнать число единиц, возьми остаток от деления на 10.', example: 'В числе 63: 6 десятков и 3 единицы. В числе 80: 8 десятков и 0 единиц.' }
+    ],
+    3: [
+      { title: 'Письменные вычисления в столбик', theory: 'При сложении и вычитании многозначных чисел в столбик записи строятся строго разряд под разрядом: единицы под единицами, десятки под десятками, сотни под сотнями.<br><br>Вычисления всегда начинаются с наименьшего разряда (с единиц). Если при сложении единиц получается 10 и более, 1 десяток передаётся в следующий разряд.', example: ' 246<br>+137<br>----<br> 383 (6+7=13, 3 пишем, 1 запоминаем; 4+3+1=8; 2+1=3).' },
+      { title: 'Умножение и деление многозначных', theory: 'Чтобы умножить двузначное или трёхзначное число на однозначное, нужно представить его в виде суммы разрядных слагаемых и умножить каждое из них на это число.', example: '234 × 2 = (200 + 30 + 4) × 2 = 400 + 60 + 8 = 468.' },
+      { title: 'Доли и геометрия', theory: 'Доля — это каждая из равных частей целого. Чтобы найти одну долю от числа, надо целое число разделить на количество частей.<br><br>Площадь (S) прямоугольника равна произведению его длины на ширину: S = a × b.', example: '1) Найдём 1/4 часть от 36: 36 ÷ 4 = 9.<br>2) Площадь комнаты со сторонами 5 м и 4 м: S = 5 × 4 = 20 м².' },
+      { title: 'Умножение двузначного на однозначное', theory: 'При умножении двузначного числа на однозначное умножай сначала единицы, затем десятки, и складывай результаты.<br><br>Пример: 23 × 3 = (20 + 3) × 3 = 60 + 9 = 69.', example: '34 × 2 = (30 + 4) × 2 = 60 + 8 = 68.' }
+    ],
+    4: [
+      { title: 'Многозначные числа в столбик', theory: 'Многозначные числа разбиваются на классы (класс единиц, класс тысяч, класс миллионов). В каждом классе по 3 разряда: единицы, десятки и сотни.', example: '5000 − 2684 = 2316. Занимаем по цепочке через нули.' },
+      { title: 'Умножение и деление на двузначное число', theory: 'Умножение выполняется столбиком в два этапа: сначала число умножается на единицы (первое неполное произведение), затем на десятки (второе неполное произведение со сдвигом влево). Результаты складываются.', example: '24 × 12 = 24 × 2 + 24 × 10 = 48 + 240 = 288.' },
+      { title: 'Обыкновенные дроби (начало)', theory: 'Дробь записывается в виде a/b, где a — числитель (сколько частей взяли), b — знаменатель (на сколько всего частей разделили целое).<br><br>Чтобы найти дробь от числа, нужно число разделить на знаменатель и умножить на числитель.', example: 'Найти 3/5 от 50: 1) 50 ÷ 5 = 10 (одна часть). 2) 10 × 3 = 30.' },
+      { title: 'Разряды многозначных чисел', theory: 'В многозначном числе каждый класс состоит из трёх разрядов: сотни, десятки, единицы. Например, в числе 1234: 1 тысяча, 2 сотни, 3 десятка, 4 единицы.<br><br>Чтобы узнать количество сотен, раздели число на 100 и возьми целую часть.', example: 'В числе 567: 5 сотен, 6 десятков, 7 единиц. Сотен — 5.' }
+    ],
+    5: [
+      { title: 'Обыкновенные дроби (сложение и вычитание)', theory: 'Правило: при сложении (или вычитании) дробей с одинаковыми знаменателями числители складывают (вычитают), а знаменатель оставляют прежним.<br><br><i>a/c + b/c = (a + b)/c</i>', example: '3/8 + 2/8 = (3+2)/8 = 5/8.' },
+      { title: 'Десятичные дроби', theory: 'Десятичная дробь — это форма записи дробей, знаменатель которых равен 10, 100, 1000 и т.д.<br>При сложении и вычитании десятичных дробей столбиком запятая обязательно записывается под запятой!', example: '3,45 + 2,10 = 5,55.' },
+      { title: 'Проценты и текстовые задачи', theory: 'Процент (%) — это одна сотая часть любого числа (1% = 1/100 = 0,01).<br><br>• Чтобы перевести проценты в десятичную дробь, раздели их на 100 (25% = 0,25).<br>• 50% — это половина (1/2), 25% — четверть (1/4), 75% — три четверти (3/4).', example: 'Найти 20% от 150: 150 × 0,20 = 30.' },
+      { title: 'Перевод процентов и дробей', theory: 'Чтобы перевести проценты в десятичную дробь, раздели число процентов на 100. Чтобы перевести десятичную дробь в проценты, умножь её на 100.<br><br>Например, 40% = 0,4; 0,75 = 75%.', example: '30% = 0,3; 0,6 = 60%.' }
+    ]
+  },
+  rus: {
+    name: 'Русский язык',
+    1: [
+      { title: 'Звуки и буквы. Гласные и согласные', theory: 'Буквы мы видим, читаем и пишем. Звуки мы слышим и произносим.<br><br>В русском алфавите 33 буквы.<br>• Гласные звуки ([а], [о], [у], [ы], [э], [и]) поются и не встречают преград во рту.<br>• Согласные звуки встречают преграду (губы, зубы, язык). Буквы Ъ и Ь звуков не обозначают!', example: 'В слове «Книга» 5 букв (к, н, и, г, а) и 5 звуков. Гласных — 2 (и, а), согласных — 3 (к, н, г).' },
+      { title: 'Правописание ЖИ-ШИ, ЧА-ЩА, ЧУ-ЩУ', theory: 'Главные орфограммы 1 класса:<br>• Буквосочетания ЖИ — ШИ всегда пиши с буквой И! (жизнь, шина)<br>• Буквосочетания ЧА — ЩА всегда пиши с буквой А! (чашка, роща)<br>• Буквосочетания ЧУ — ЩУ всегда пиши с буквой У! (чудо, щука)', example: 'Встретил ш...шку → пишем И (шишка). Увидел ч...лан → пишем У (чулан).' },
+      { title: 'Предложение и слова', theory: 'Предложение — это одно или несколько слов, выражающих законченную мысль. Первое слово всегда пишется с большой (заглавной) буквы, а слова пишутся раздельно.<br><br>В конце предложения ставится точка (.), вопросительный (?) или восклицательный (!) знак.', example: '«Наступила золотая осень.» — предложение состоит из 3 слов.' }
+    ],
+    2: [
+      { title: 'Безударные гласные в корне слова', theory: 'Чтобы правильно написать гласную в безударном положении в корне слова, нужно изменить слово или подобрать однокоренное так, чтобы эта гласная стала под ударением!<br><br><i>Пример: в...да → во́ды → вода.</i>', example: 'Тр...ва → подбираем проверочное слово: тра́вы. Значит, пишем букву А (трава).' },
+      { title: 'Парные согласные на конце и в середине', theory: 'Парные по глухости-звонкости согласные (Б-П, В-Ф, Г-К, Д-Т, Ж-Ш, З-С) на конце слова и перед глухими согласными требуют проверки.<br>Подбери слово, где после согласного стоит гласный звук (<i>дуб — дубы</i>).', example: 'Сказ...ка → подбираем слово сказочка (после з идёт о). Пишем «сказка».' },
+      { title: 'Большая буква в именах собственных', theory: 'Имена, отчества и фамилии людей, клички животных, названия городов, рек, стран и улиц — это имена собственные. Они всегда пишутся с заглавной буквы!', example: 'город Москва, кот Барсик, поэт Александр Сергеевич Пушкин.' }
+    ],
+    3: [
+      { title: 'Состав слова (Корень, приставка, суффикс, окончание)', theory: 'Слово состоит из морфем:<br>• Корень — главная общая часть однокоренных слов.<br>• Приставка — стоит перед корнем и служит для образования новых слов.<br>• Суффикс — стоит после корня и образует новые слова.<br>• Окончание — изменяемая часть слова для связи слов в предложении.', example: 'В слове «Подводник»: приставка ПОД-, корень -ВОД-, суффикс -НИК-, нулевое окончание.' },
+      { title: 'Части речи (Существительное, прилагательное, глагол)', theory: '• Имя существительное обозначает предмет и отвечает на вопросы Кто? Что?<br>• Имя прилагательное обозначает признак предмета и отвечает на вопросы Какой? Какая? Какое?<br>• Глагол обозначает действие предмета и отвечает на вопросы Что делать? Что сделать?', example: 'Яркое (прил.) солнце (сущ.) светит (глаг.).' },
+      { title: 'Главные члены предложения (Подлежащее и сказуемое)', theory: 'Грамматическая основа предложения состоит из главных членов:<br>• Подлежащее (кто? что?) — обозначает предмет речи, подчёркивается одной чертой.<br>• Сказуемое (что делает?) — обозначает действие подлежащего, подчёркивается двумя чертами.', example: 'Птицы (подлежащее) улетают (сказуемое) на юг.' }
+    ],
+    4: [
+      { title: 'Падежи имён существительных', theory: 'В русском языке 6 падежей:<br>1. Именительный (И.п.): кто? что?<br>2. Родительный (Р.п.): кого? чего? (нет)<br>3. Дательный (Д.п.): кому? чему? (рад)<br>4. Винительный (В.п.): кого? что? (вижу)<br>5. Творительный (Т.п.): кем? чем? (доволен)<br>6. Предложный (П.п.): о ком? о чём? (думаю)', example: 'Книга (И.п.) → нет книги (Р.п.) → дарю книге (Д.п.) → вижу книгу (В.п.).' },
+      { title: 'Спряжение глаголов', theory: 'Спряжение — это изменение глаголов по лицам и числам.<br>• II спряжение: все глаголы на -ИТЬ (кроме брить, стелить), а также 11 глаголов-исключений (гнать, держать, смотреть, видеть, дышать, слышать, ненавидеть, зависеть, терпеть, обидеть, вертеть).<br>• I спряжение: все остальные глаголы на -АТЬ, -ЕТЬ, -ОТЬ, -УТЬ.', example: 'Строить (на -ить) — II спряжение. Читать (на -ать) — I спряжение.' },
+      { title: 'Однородные члены предложения', theory: 'Однородные члены отвечают на один и тот же вопрос и относятся к одному и тому же слову.<br>Между однородными членами без союзов или перед союзами А, НО всегда ставится запятая.', example: 'На столе лежали яблоки, груши и сливы.' }
+    ],
+    5: [
+      { title: 'Синонимы, антонимы, омонимы', theory: '• Синонимы — слова, близкие по значению (смелый — храбрый).<br>• Антонимы — слова с противоположным значением (день — ночь).<br>• Омонимы — слова, одинаковые по звучанию и написанию, но имеющие абсолютно разное значение (ключ от замка — водяной ключ).', example: 'Высокий — низкий (антонимы); метель — вьюга (синонимы).' },
+      { title: 'Фразеологизмы', theory: 'Фразеологизмы — это устойчивые выражения, которые используются в переносном значении и равны по смыслу одному слову.<br><i>Пример: Бить баклуши = бездельничать. Водить за нос = обманывать.</i>', example: '«Работать спустя рукава» значит делать работу крайне плохо и небрежно.' },
+      { title: 'Морфемика и чередование гласных в корне', theory: 'Правописание чередующихся гласных зависит от правил:<br>• В корнях -ЛАГ- / -ЛОЖ- перед Г пишется А, перед Ж пишется О (полагать — положить).<br>• В корнях -РАСТ- / -РАЩ- / -РОС- перед СТ и Щ пишется А, перед С — О (расти, выращивать, вырос).', example: 'Предлагать (перед г — а) → предложить (перед ж — о).' }
+    ]
+  }
+};
+
+let state = {
+  subject: null, grade: null, topic: null,
+  currentTasks: [],
+  completedTests: safeGetCompleted(),
+  isTestCompleted: false
+};
+
+const $ = id => document.getElementById(id);
+
+function updateUserUI() {
+  $('userBadge').textContent = `Пройдено тестов: ${state.completedTests}`;
+  safeSetCompleted(state.completedTests);
+}
+
+window.goToHome = function() {
+  state.subject = null; state.grade = null; state.topic = null; state.isTestCompleted = false;
+  showScreen('screenHome');
+};
+
+window.selectSubject = function(subKey) {
+  state.subject = subKey;
+  $('gradesHeroSub').textContent = curriculum[subKey].name;
+  showScreen('screenGrades');
+};
+
+window.goToGrades = function() {
+  state.grade = null; state.topic = null; state.isTestCompleted = false;
+  showScreen('screenGrades');
+};
+
+window.selectGrade = function(gradeNum) {
+  state.grade = gradeNum;
+  $('topicsHeroSub').textContent = `${curriculum[state.subject].name} · ${gradeNum} класс`;
+  renderTopics();
+  showScreen('screenTopics');
+};
+
+window.goToTopics = function() {
+  state.topic = null; state.isTestCompleted = false;
+  showScreen('screenTopics');
+};
+
+function showScreen(screenId) {
+  ['screenHome','screenGrades','screenTopics','screenLesson','screenCreator','screenStudent'].forEach(id => {
+    const el = $(id);
+    if (id === screenId) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderTopics() {
+  const topics = curriculum[state.subject][state.grade];
+  $('topicListContainer').innerHTML = topics.map((t, i) => `
+    <button type="button" class="topic-btn" onclick="window.selectTopic(${i})">
+      <div class="topic-info">
+        <span class="topic-number">Тема ${i+1}</span>
+        <strong>${t.title}</strong>
+      </div>
+      <div class="topic-arrow">→</div>
+    </button>
+  `).join('');
+}
+
+window.selectTopic = function(topicIndex) {
+  state.topic = topicIndex;
+  state.isTestCompleted = false;
+  generateAndRenderLesson();
+  showScreen('screenLesson');
+};
+
+function normalize(v) {
+  return String(v).trim().toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/,/g, '.')
+    .replace(/−/g, '-')
+    .replace(/⁄/g, '/')
+    .replace(/\\/g, '');
+}
+
+function generateAndRenderLesson() {
+  const lessonInfo = curriculum[state.subject][state.grade][state.topic];
+  state.currentTasks = generateTestTasks(state.subject, state.grade, state.topic);
+  state.isTestCompleted = false;
+  $('theoryDropdown').classList.remove('open');
+  $('theoryToggleBtn').textContent = 'Подробнее (Теория и правила)';
+  $('gradeLabel').textContent = `${state.grade} класс · ${curriculum[state.subject].name}`;
+  $('countLabel').textContent = state.currentTasks.length + ' заданий';
+  $('topicTitle').textContent = lessonInfo.title;
+  $('theory').innerHTML = formatText(lessonInfo.theory);
+  $('example').innerHTML = formatText(lessonInfo.example);
+  $('tasks').innerHTML = state.currentTasks.map((t, i) => `
+    <div class="task">
+      <div class="task-head">
+        <div class="num">${i+1}</div>
+        <div class="question">${formatText(t[0])}</div>
+      </div>
+      <div class="answer">
+        <input type="text" inputmode="text" autocomplete="off" id="answer${i}" placeholder="Твой ответ" aria-label="Ответ на задание ${i+1}">
+      </div>
+      <div class="feedback" id="feedback${i}"></div>
+    </div>
+  `).join('');
+  $('result').classList.remove('show');
+  $('progressBar').style.width = '0%';
+  $('checkBtn').textContent = 'Проверить ответы';
+  $('resetBtn').disabled = false;
+  $('resetBtn').textContent = '🔄 Новые задания (Сброс)';
+}
+
+/* ===================== КОНСТРУКТОР ТЕСТОВ ===================== */
+let editorQuestions = [];
+
+window.openCreator = function() {
+  editorQuestions = [];
+  $('testTitle').value = '';
+  $('testDescription').value = '';
+  $('creatorError').textContent = '';
+  $('shareResult').style.display = 'none';
+  addQuestion();
+  showScreen('screenCreator');
+};
+
+window.addQuestion = function() {
+  if (editorQuestions.length >= 30) { $('creatorError').textContent = 'Максимум 30 вопросов.'; return; }
+  editorQuestions.push({ text:'', type:'choice', options:['','','',''], correct:0, answer:'' });
+  renderEditors();
+};
+
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function renderEditors(){
+  $('questionEditors').innerHTML = editorQuestions.map((q,i)=>`
+    <div class="q-editor" data-index="${i}">
+      <div class="q-head">
+        <strong>Вопрос ${i+1}</strong>
+        <button type="button" class="q-danger" onclick="window.removeQuestion(${i})">Удалить</button>
+      </div>
+      <label class="creator-label">Текст вопроса</label>
+      <textarea class="creator-textarea q-text" maxlength="500" placeholder="Напиши вопрос">${escapeHTML(q.text)}</textarea>
+      <label class="creator-label">Тип ответа</label>
+      <select class="creator-select q-type" onchange="window.changeType(${i},this.value)">
+        <option value="choice" ${q.type==='choice'?'selected':''}>Выбор варианта</option>
+        <option value="text" ${q.type==='text'?'selected':''}>Ввод ответа</option>
+      </select>
+      ${q.type==='choice'?`
+        <label class="creator-label">Варианты ответов</label>
+        <div class="q-options">
+          ${q.options.map((v,j)=>`
+            <input class="creator-input q-option" data-option="${j}" maxlength="160" placeholder="Вариант ${j+1}" value="${escapeHTML(v)}">
+          `).join('')}
+        </div>
+        <label class="creator-label">Правильный вариант</label>
+        <select class="creator-select q-correct">
+          ${q.options.map((v,j)=>`<option value="${j}" ${q.correct===j?'selected':''}>Вариант ${j+1}</option>`).join('')}
+        </select>
+      `:`
+        <label class="creator-label">Правильный ответ</label>
+        <input class="creator-input q-answer" maxlength="160" placeholder="Например: 42" value="${escapeHTML(q.answer)}">
+      `}
+    </div>
+  `).join('');
+}
+
+function readEditors(){
+  document.querySelectorAll('.q-editor').forEach(el=>{
+    const i = Number(el.dataset.index);
+    const q = editorQuestions[i];
+    q.text = el.querySelector('.q-text').value.trim();
+    q.type = el.querySelector('.q-type').value;
+    if (q.type==='choice'){
+      q.options = [...el.querySelectorAll('.q-option')].map(x=>x.value.trim());
+      q.correct = Number(el.querySelector('.q-correct').value);
+    } else {
+      q.answer = el.querySelector('.q-answer').value.trim();
+    }
+  });
+}
+
+window.changeType = function(index, type){
+  readEditors();
+  editorQuestions[index].type = type;
+  renderEditors();
+};
+
+window.removeQuestion = function(index){
+  readEditors();
+  editorQuestions.splice(index,1);
+  renderEditors();
+};
+
+window.publishTest = function(){
+  readEditors();
+  const title = $('testTitle').value.trim();
+  const description = $('testDescription').value.trim();
+
+  if(!title){ $('creatorError').textContent = 'Укажи название теста.'; return; }
+  if(editorQuestions.length === 0){ $('creatorError').textContent = 'Добавь хотя бы один вопрос.'; return; }
+
+  for(let i=0;i<editorQuestions.length;i++){
+    const q = editorQuestions[i];
+    if(!q.text){ $('creatorError').textContent = `Заполни вопрос №${i+1}.`; return; }
+    if(q.type==='choice'){
+      if(q.options.filter(Boolean).length < 2){ $('creatorError').textContent = `В вопросе №${i+1} нужно минимум два варианта.`; return; }
+      if(!q.options[q.correct]){ $('creatorError').textContent = `Выбери правильный вариант в вопросе №${i+1}.`; return; }
+    } else if(!q.answer){
+      $('creatorError').textContent = `Укажи правильный ответ в вопросе №${i+1}.`; return;
+    }
+  }
+
+  const data = {
+    v:1, t:title, d:description,
+    q: editorQuestions.map(q => q.type==='choice'
+      ? {t:q.text, o:q.options.filter(Boolean), c:q.options.filter(Boolean).indexOf(q.options[q.correct])}
+      : {t:q.text, a:q.answer})
+  };
+
+  let encoded;
+  try {
+    encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  } catch(e){
+    $('creatorError').textContent = 'Ошибка подготовки теста.'; return;
+  }
+
+  const url = location.href.split('#')[0] + '#quiz=' + encoded;
+  if(url.length > 2000){
+    $('creatorError').textContent = 'Слишком длинная ссылка. Попробуй сократить тест.'; return;
+  }
+
+  $('shareUrl').textContent = url;
+  $('shareResult').style.display = 'block';
+  $('creatorError').textContent = '';
+  $('qrcode').innerHTML = '';
+
+  if(typeof QRCode !== 'undefined'){
+    try {
+      new QRCode($('qrcode'), { text:url, width:220, height:220, colorDark:'#111111', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+    } catch(e){
+      $('qrcode').textContent = 'Не удалось создать QR-код. Используй ссылку ниже.';
+    }
+  } else {
+    $('qrcode').textContent = 'QR-библиотека не загрузилась. Используй ссылку ниже.';
+  }
+  $('shareResult').scrollIntoView({behavior:'smooth'});
+};
+
+window.copyLink = async function(){
+  const url = $('shareUrl').textContent;
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Ссылка скопирована!');
+  } catch(e){
+    alert('Не удалось скопировать. Выдели ссылку вручную.');
+  }
+};
+
+/* ===================== ПРОХОЖДЕНИЕ ТЕСТА ПО ССЫЛКЕ ===================== */
+function loadSharedQuiz(){
+  if(!location.hash.startsWith('#quiz=')) return false;
+  try {
+    const raw = location.hash.slice(6).replace(/-/g,'+').replace(/_/g,'/');
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(data.v!==1 || !data.t || !Array.isArray(data.q) || !data.q.length || data.q.length>30) throw Error('invalid');
+
+    $('studentTitle').textContent = data.t;
+    $('studentDescription').textContent = data.d || 'Ответь на вопросы и заверши тест.';
+    $('studentCount').textContent = 'Количество вопросов: ' + data.q.length;
+
+    $('studentQuestions').innerHTML = data.q.map((q,i)=>`
+      <div class="q-editor">
+        <strong>${i+1}. ${escapeHTML(q.t)}</strong>
+        ${Array.isArray(q.o)
+          ? q.o.map((option,j)=>`
+            <div class="student-option">
+              <input type="radio" name="student${i}" id="sq${i}_${j}" value="${j}">
+              <label for="sq${i}_${j}">${escapeHTML(option)}</label>
+            </div>
+          `).join('')
+          : `<input class="student-text" id="studentText${i}" placeholder="Твой ответ">`
+        }
+      </div>
+    `).join('');
+
+    $('studentResult').classList.remove('show');
+    $('submitStudent').disabled = false;
+    $('submitStudent').textContent = 'Завершить тест';
+
+    $('submitStudent').onclick = () => {
+      let score = 0;
+      data.q.forEach((q,i)=>{
+        let correct = false;
+        if(Array.isArray(q.o)){
+          const selected = document.querySelector(`input[name="student${i}"]:checked`);
+          correct = !!selected && Number(selected.value) === q.c;
+        } else {
+          const value = $('studentText'+i).value.trim().toLowerCase();
+          correct = value !== '' && value.replace(/\s+/g,'') === String(q.a).trim().toLowerCase().replace(/\s+/g,'');
+        }
+        if(correct) score++;
+      });
+
+      const percent = Math.round(score/data.q.length*100);
+      const box = $('studentResult');
+      box.innerHTML = `
+        <div class="lesson-head"><strong>${score} из ${data.q.length}</strong><span class="pill">${percent}%</span></div>
+        <p>${percent===100?'Отлично! Все ответы правильные':percent>=60?'Хороший результат!':'Попробуй повторить материал.'}</p>
+      `;
+      box.classList.add('show');
+      $('submitStudent').disabled = true;
+      $('submitStudent').textContent = 'Тест завершён';
+
+      if(percent === 100){
+        state.completedTests++;
+        updateUserUI();
+      }
+    };
+
+    showScreen('screenStudent');
+    return true;
+  } catch(e){
+    alert('Ссылка повреждена или тест не удалось открыть.');
+    history.replaceState(null,'',location.pathname+location.search);
+    return false;
+  }
+}
+
+function setupEventListeners() {
+  $('homeLogo').onclick = window.goToHome;
+
+  $('theoryToggleBtn').onclick = () => {
+    const dropdown = $('theoryDropdown');
+    const isOpen = dropdown.classList.contains('open');
+    if (isOpen) {
+      dropdown.classList.remove('open');
+      $('theoryToggleBtn').textContent = 'Подробнее (Теория и правила)';
+    } else {
+      dropdown.classList.add('open');
+      $('theoryToggleBtn').textContent = 'Скрыть теорию';
+    }
+  };
+
+  $('checkBtn').onclick = () => {
+    const tasks = state.currentTasks;
+    let correct = 0, filled = 0;
+    tasks.forEach((t,i)=>{
+      const input = $('answer'+i);
+      const feedback = $('feedback'+i);
+      const value = normalize(input.value);
+      const expected = normalize(t[1]);
+      input.classList.remove('correct','wrong');
+      feedback.className = 'feedback';
+      if(value !== '') filled++;
+      if(value !== '' && value === expected){
+        correct++;
+        input.classList.add('correct');
+        feedback.classList.add('good');
+        feedback.innerHTML = 'Правильно! ' + formatText(t[3]);
+      } else {
+        input.classList.add('wrong');
+        feedback.classList.add('bad');
+        feedback.innerHTML = (value === '' ? 'Введите ответ. ' : 'Пока неверно. ') + 'Подсказка: ' + formatText(t[2]) + ' Правильный ответ: ' + formatText(String(t[1])) + '.';
+      }
+    });
+    const total = tasks.length;
+    const percent = Math.round(correct/total*100);
+    $('score').textContent = correct + ' из ' + total;
+    $('percent').textContent = percent + '%';
+    if (percent === 100 && filled === total){
+      state.completedTests++;
+      updateUserUI();
+    }
+    if (filled === total){
+      state.isTestCompleted = true;
+    }
+    $('resultText').textContent = filled < total
+      ? 'Заполнено ' + filled + ' из ' + total + ' заданий. Исправьте ответы и проверьте ещё раз.'
+      : percent === 100
+        ? 'Отличная работа! Все ответы правильные'
+        : percent >= 60
+          ? 'Хороший результат! Прочитайте объяснения ошибок и попробуйте ещё раз.'
+          : 'Не сдавайтесь! Повторите правило и попробуйте решить задания ещё раз.';
+    $('result').classList.add('show');
+    $('progressBar').style.width = percent + '%';
+  };
+
+  $('resetBtn').onclick = () => {
+    generateAndRenderLesson();
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateUserUI();
+  setupEventListeners();
+  if(!loadSharedQuiz()) window.goToHome();
+});
+</script>
+</body>
+</html>
